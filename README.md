@@ -1,3 +1,5 @@
+GRUPO : VINICIUS PASSOS, GUILHERME LIMA, GUILHERME MESSIAS ALBERNAZ, JOÃO BATISTA
+
 Visão Inicial: Pré-Modelagem de Ameaças
 
 Nesta fase inicial, a arquitetura era funcional, mas apresentava falhas de segurança significativas, pois a lógica de comunicação e as credenciais estavam expostas no lado do cliente (frontend).
