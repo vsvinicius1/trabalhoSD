@@ -1,0 +1,11 @@
+include:
+  - ./pyDiffusion/docker-compose.yml
+services:
+  server:
+    build:
+      context: .
+    environment:
+      NODE_ENV: production
+      GEMINI_API_KEY: AIzaSyC9fSt8jiJrrAWw6fjpHAZuYnDjRXDggKg
+    ports:
+      - 3000:3000

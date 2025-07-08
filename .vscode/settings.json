@@ -1,0 +1,6 @@
+{
+    "liveServer.settings.multiRootWorkspaceName": "trabalhoSD",
+    "liveServer.settings.ignoreFiles": [
+        "pyDiffusion/*"
+    ]
+}

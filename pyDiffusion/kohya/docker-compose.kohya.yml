@@ -1,0 +1,39 @@
+version: "3.8"
+name: kohya-ss
+
+services:
+  kohya:
+    image: ghcr.io/neggles/kohya-ss-docker:latest
+    restart: unless-stopped
+    container_name: kohya-ss
+    environment:
+      CLI_ARGS: ""
+      KOHYA_PORT: 7861
+      # make TQDM behave a little better
+      TERM: "${TERM}"
+      # Set to your local cuda version's install path, and update the bind mount below
+      # CUDA_HOME: "/usr/local/cuda-12.0"
+    ports:
+      - mode: ingress
+        target: 7861
+        published: 7861
+        protocol: tcp
+      - mode: ingress
+        target: 6006
+        published: 6006
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: ./data
+        target: /data
+      # you will need to set this to your local cuda version install path for bitsandbytes to work right
+      - type: bind
+        source: /usr/local/cuda-12.0
+        target: /usr/local/cuda-12.0
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [ gpu ]
+              device_ids: [ "0" ]

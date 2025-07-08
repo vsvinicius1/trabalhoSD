@@ -1,0 +1,161 @@
+# syntax=docker/dockerfile:1
+
+ARG DEBIAN_FRONTEND=noninteractive
+ARG DEBIAN_PRIORITY=critical
+ARG PIP_PREFER_BINARY=1
+
+FROM alpine/git:2.36.2 as download
+
+# Get bash, set shell
+RUN apk add --no-cache bash
+SHELL [ "/bin/bash", "-ceuxo", "pipefail" ]
+
+# This isn't strictly necessary as it's set upstream, but it's here for clarity
+WORKDIR /git
+
+# Clone repositories
+ARG STABLE_DIFFUSION_REF
+RUN rm -fr "stable-diffusion-stability-ai" \
+    && git clone --recursive --depth=1 \
+        "https://github.com/Stability-AI/stablediffusion.git" "stable-diffusion-stability-ai" \
+    && cd "stable-diffusion-stability-ai" \
+    && git fetch origin "${STABLE_DIFFUSION_REF}" \
+    && git reset --hard FETCH_HEAD \
+    && rm -fr ./assets ./data/**/*.png ./data/**/*.jpg ./data/**/*.gif
+
+ARG BLIP_REF
+RUN rm -fr "BLIP" \
+    && git clone --recursive --depth=1 \
+        "https://github.com/salesforce/BLIP.git" "BLIP" \
+    && cd "BLIP" \
+    && git fetch origin "${BLIP_REF}" \
+    && git reset --hard FETCH_HEAD
+
+ARG K_DIFFUSION_REF
+RUN rm -fr "k-diffusion" \
+    && git clone --recursive --depth=1 \
+        "https://github.com/crowsonkb/k-diffusion.git" "k-diffusion" \
+    && cd "k-diffusion" \
+    && git fetch origin "${K_DIFFUSION_REF}" \
+    && git reset --hard FETCH_HEAD
+
+ARG STABLE_DIFFUSION_XL_REF
+RUN rm -fr "generative-models" \
+    && git clone --recursive --depth=1 \
+        "https://github.com/Stability-AI/generative-models.git" "generative-models" \
+    && cd "generative-models" \
+    && git fetch origin "${STABLE_DIFFUSION_XL_REF}" \
+    && git reset --hard FETCH_HEAD
+
+ARG SD_WEBUI_ASSETS_REF
+RUN rm -fr "stable-diffusion-webui-assets" \
+    && git clone --recursive --depth=1 \
+        "https://github.com/AUTOMATIC1111/stable-diffusion-webui-assets.git" "stable-diffusion-webui-assets" \
+    && cd "stable-diffusion-webui-assets" \
+    && git fetch origin "${SD_WEBUI_ASSETS_REF}" \
+    && git reset --hard FETCH_HEAD
+
+# print out the contents of the git directory for debugging
+RUN ls -l && sleep 5
+
+FROM base AS webui
+
+# set up some important environment variables
+ARG DEBIAN_FRONTEND
+ARG DEBIAN_PRIORITY
+ARG PIP_PREFER_BINARY
+
+ENV LC_ALL=C.UTF-8
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONIOENCODING=utf-8
+
+# make pip STFU about being root
+ENV PIP_ROOT_USER_ACTION=ignore
+
+# CUDA-related
+ENV CUDA_MODULE_LOADING=LAZY
+ENV TORCH_ALLOW_TF32_CUBLAS_OVERRIDE=1
+ENV PYTORCH_CUDA_ALLOC_CONF="garbage_collection_threshold:0.9,max_split_size_mb:512"
+ENV NVIDIA_DRIVER_CAPABILITIES=compute,utility,graphics
+ENV NVIDIA_REQUIRE_CUDA="cuda>=12.1 driver>=500"
+ENV TCMALLOC_AGGRESSIVE_DECOMMIT=t
+
+# Where we should put everything
+ENV ROOT_DIR=/stable-diffusion-webui
+
+# Install GFPGAN, CLIP, OPENCLIP and pyngrok
+ARG CLIP_PKG_REF
+ARG OPENCLIP_PKG_REF
+RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
+    pip install \
+    pyngrok \
+    "git+https://github.com/openai/CLIP.git@${CLIP_PKG_REF}" \
+    "git+https://github.com/mlfoundations/open_clip.git@${OPENCLIP_PKG_REF}"
+
+# Clone actual repo
+ARG SD_WEBUI_REF
+ARG SD_WEBUI_REPO
+RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
+    git clone ${SD_WEBUI_REPO} ${ROOT_DIR} \
+    && cd ${ROOT_DIR} \
+    && git fetch origin ${SD_WEBUI_REF} \
+    && git reset --hard FETCH_HEAD \
+    && git submodule sync \
+    && git submodule update --init --recursive
+
+# set workdir
+WORKDIR ${ROOT_DIR}
+
+# Reupdate the repo to target hash and install deps
+RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
+    pip install -r requirements_versions.txt
+
+# copy the dep repos from the download stage
+RUN --mount=type=bind,from=download,source=/git,target=/git \
+    mkdir -p ${ROOT_DIR}/repositories \
+    && cp -rp /git/* ${ROOT_DIR}/repositories/
+
+# Install extra packages needed for extensions
+RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
+    pip install \
+    accelerate \
+    diffusers \
+    ffmpeg-python \
+    natsort \
+    onnxruntime-gpu \
+    opencv-contrib-python-headless \
+    scenedetect \
+    scikit-learn \
+    segment-anything \
+    segmentation-refinement
+
+# Install moviepy and up-to-date tqdm
+RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
+    pip install 'moviepy>=1.0.3' 'tqdm>=4.65.0' 'imageio-ffmpeg'
+
+# Install xformers (we do this after the above to make sure we get the versions we want)
+# Install xformers
+ARG XFORMERS_PACKAGE="xformers"
+ARG XFORMERS_PIP_ARGS=""
+RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
+    python -m pip install ${XFORMERS_PIP_ARGS} "${XFORMERS_PACKAGE}" \
+    || python -m pip install --pre ${XFORMERS_PIP_ARGS} "${XFORMERS_PACKAGE}"
+
+# Add the rest of the files
+COPY . /docker
+COPY ./entrypoint.sh /docker/entrypoint.sh
+
+# Commit high treason
+RUN sed -i 's/in_app_dir = .*/in_app_dir = True/g' /usr/local/lib/python3.10/site-packages/gradio/routes.py
+
+# Set up the entrypoint
+WORKDIR ${ROOT_DIR}
+ENV CLI_ARGS=""
+ENV DATA_DIR=/data
+ENV WEBUI_PORT=7860
+ENV UID=1000
+ENV GID=1000
+
+EXPOSE ${WEBUI_PORT}
+ENTRYPOINT [ "/docker/entrypoint.sh" ]
+CMD python -u webui.py --listen --port ${WEBUI_PORT} --skip-version-check ${CLI_ARGS}

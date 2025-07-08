@@ -41,8 +41,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // A geração de imagem continua simulada por enquanto
         imageContainer.innerHTML = `
             <div class="image-placeholder">
-                 <p class="animate-pulse">O arcanista aguarda as palavras do bardo...</p>
-            </div>`;
+                <p class="animate-pulse">O arcanista aguarda as palavras do bardo...</p>
+            </div>
+        `;
 
         try {
             // Chama a nossa API backend
@@ -51,7 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ prompt: prompt }),
+                body: JSON.stringify({ prompt: prompt, style: 'rpg' }),
             });
 
             if (!response.ok) {
@@ -60,16 +61,59 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const data = await response.json();
-            
-            // Atualiza o painel de descrição com a resposta real da API
-            descriptionContent.innerHTML = `<p>${data.description}</p>`;
+            const description = data.description.split('Texto: ')?.[1] || data.description;
 
-            // Simula a geração da imagem após a descrição estar pronta
-            const placeholderUrl = `https://placehold.co/600x400/111827/9ca3af?text=${encodeURIComponent(prompt)}`;
+            // Atualiza o painel de descrição com a resposta real da API
+            descriptionContent.innerHTML = `<p>${description}</p>`;
+
             imageContainer.innerHTML = `
                 <div class="image-placeholder">
-                    <img src="${placeholderUrl}" alt="Imagem gerada pela IA para: ${prompt}" class="generated-image" style="opacity:0; transition: opacity 500ms;" onload="this.style.opacity=1">
-                </div>`;
+                    <p class="animate-pulse">O arcanista está idealizando a cena...</p>
+                </div>
+            `;
+
+            const responsePromptImg = await fetch('http://localhost:3000/api/generate-description', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ prompt: data.description, style: 'image' }),
+            });
+
+            if (!responsePromptImg.ok) {
+                // Se a resposta da API não for bem-sucedida, lança um erro
+                throw new Error(`Erro da API: ${responsePromptImg.statusText}`);
+            }
+
+            const dataPromptImg = await responsePromptImg.json();
+
+            imageContainer.innerHTML = `
+                <div class="image-placeholder">
+                    <p class="animate-pulse">O arcanista está imaginando a cena...</p>
+                </div>
+            `;
+
+            const responseImg = await fetch('http://localhost:3000/api/generate-img', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ prompt: dataPromptImg.description }),
+            });
+
+            if (!responseImg.ok) {
+                // Se não foi, lança um erro com a mensagem de status
+                throw new Error(`Erro na API: ${responseImg.status} ${responseImg.statusText}`);
+            }
+
+            const imageBlob = await responseImg.blob();
+            const imageUrl = URL.createObjectURL(imageBlob);
+
+            imageContainer.innerHTML = `
+                <div class="image-placeholder">
+                    <img src="${imageUrl}" alt="Imagem gerada pela IA para: ${prompt}" class="generated-image" style="opacity:0; transition: opacity 500ms;" onload="this.style.opacity=1">
+                </div>
+            `;
 
         } catch (error) {
             console.error("Falha ao contactar a API:", error);

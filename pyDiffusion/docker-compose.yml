@@ -1,0 +1,53 @@
+services:
+  webui:
+    image: ghcr.io/neggles/sd-webui-docker:latest
+    restart: unless-stopped
+    container_name: sd-webui
+    build:
+      context: ./docker
+      dockerfile: Dockerfile
+      target: webui
+    runtime: nvidia
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all
+      CLI_ARGS: "--skip-version-check --allow-code --enable-insecure-extension-access --api --xformers --opt-channelslast"
+      PYTHONUNBUFFERED: "1"
+      TERM: "${TERM}"
+      SD_WEBUI_VARIANT: "default"
+    ports:
+      - mode: ingress
+        target: 7860
+        published: 7860
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: ./data
+        target: /data
+      - type: bind
+        source: ./output
+        target: /output
+
+  browser:
+    image: ghcr.io/neggles/sd-webui-docker/browser:latest
+    restart: unless-stopped
+    container_name: sd-browser
+    profiles:
+      - "browser" # <-- fixed the indentation
+    build:
+      context: ./browser
+      dockerfile: Dockerfile
+      target: browser
+    environment:
+      BROWSER_PORT: 7869
+    ports:
+      - mode: ingress
+        target: 7869
+        published: 7869
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: ./data
+        target: /data
+      - type: bind
+        source: ./output
+        target: /output
