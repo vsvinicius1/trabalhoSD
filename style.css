@@ -1,0 +1,228 @@
+/* --- ESTILOS GERAIS E FONTES --- */
+body {
+    background-color: #111827;
+    color: #e5e7eb;
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6, button {
+    font-family: 'Cinzel', serif;
+}
+
+/* --- LAYOUT PRINCIPAL --- */
+.app-container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 1rem;
+    height: 100vh;
+    max-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    box-sizing: border-box;
+}
+
+/* --- PAINÉIS (CHAT E OUTPUT) --- */
+.chat-panel, .output-panel {
+    display: flex;
+    flex-direction: column;
+    background-color: rgba(31, 41, 55, 0.5);
+    backdrop-filter: blur(4px);
+    border: 1px solid #374151; 
+    border-radius: 0.75rem;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    overflow: hidden;
+}
+
+.chat-panel {
+    width: 100%;
+}
+
+.output-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    height: 100%;
+}
+
+.output-panel {
+    height: 50%;
+}
+
+/* --- CABEÇALHO E CONTEÚDO DOS PAINÉIS --- */
+.panel-header {
+    padding: 1rem;
+    border-bottom: 1px solid #374151;
+}
+
+.header-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.purple-title { color: #c084fc; }
+.teal-title { color: #2dd4bf; }
+.amber-title { color: #f59e0b; }
+.panel-content, .chat-messages-area {
+    flex-grow: 1;
+    padding: 1rem;
+    overflow-y: auto;
+}
+
+.placeholder-text {
+    color: #9ca3af;
+    font-style: italic;
+}
+
+/* --- PAINEL DE CHAT ESPECÍFICO --- */
+.chat-messages-area {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.message-container {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.75rem;
+}
+
+.avatar {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 9999px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.master-avatar { background-color: #a855f7; }
+.user-avatar { background-color: #4b5563; }
+
+.message-bubble {
+    padding: 0.75rem; 
+    border-radius: 0.5rem;
+    max-width: 80%;
+    font-size: 0.875rem;
+    word-wrap: break-word;
+}
+
+.master-bubble { background-color: #374151; }
+.user-bubble { background-color: #7e22ce; }
+
+.message-container.user {
+    justify-content: flex-end;
+}
+
+/* --- FORMULÁRIO DE CHAT --- */
+.panel-footer {
+    padding: 1rem;
+    border-top: 1px solid #374151;
+}
+
+.chat-form {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.chat-input {
+    flex-grow: 1;
+    background-color: #374151;
+    border: 1px solid #4b5563;
+    border-radius: 0.5rem; 
+    padding: 0.75rem;
+    transition: all 300ms ease;
+    color: #e5e7eb;
+}
+
+.chat-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #a855f7;
+}
+
+.button-primary {
+    background-color: #9333ea; 
+    color: white;
+    font-weight: 700;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    transition: all 300ms ease;
+    border: none;
+    cursor: pointer;
+}
+
+.button-primary:hover {
+    background-color: #7e22ce;
+    transform: scale(1.05);
+}
+
+/* --- PAINEL DE IMAGEM ESPECÍFICO --- */
+.image-display-area {
+    flex-grow: 1;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-placeholder {
+    width: 100%;
+    height: 100%;
+    background-color: rgba(17, 24, 39, 0.5);
+    border-radius: 0.375rem; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed #4b5563;
+    color: #9ca3af;
+}
+
+.generated-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 0.375rem;
+}
+
+/* --- ANIMAÇÕES E SCROLLBAR --- */
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .5; }
+}
+
+.custom-scrollbar::-webkit-scrollbar { width: 8px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: #1f2937; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+
+/* --- MEDIA QUERIES PARA RESPONSIVIDADE --- */
+/* Telas de tablet e maiores (md) */
+@media (min-width: 768px) {
+    .app-container {
+        flex-direction: row;
+    }
+    .chat-panel {
+        width: 33.333333%;
+    }
+    .output-container {
+        width: 66.666667%;
+    }
+}
+
+/* Telas de desktop (lg) */
+@media (min-width: 1024px) {
+    .chat-panel {
+        width: 40%;
+    }
+    .output-container {
+        width: 60%;
+    }
+}

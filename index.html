@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPG Assistant</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- CSS Externo com classes semânticas -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <main class="app-container">
+
+        <!-- Painel Esquerdo: Chat -->
+        <aside class="chat-panel">
+            <header class="panel-header">
+                <h2 class="header-title purple-title">Diário do Aventureiro</h2>
+            </header>
+            
+            <!-- Área de Mensagens -->
+            <section id="chat-messages" class="chat-messages-area custom-scrollbar">
+                <!-- Mensagem de Exemplo -->
+                <div class="message-container">
+                    <div class="avatar master-avatar">M</div>
+                    <div class="message-bubble master-bubble">
+                        <p>Bem-vindo, mestre! Descreva a cena, o personagem ou o item que deseja criar, e eu darei vida a ele.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Área de Input -->
+            <footer class="panel-footer">
+                <form id="chat-form" class="chat-form">
+                    <input type="text" id="chat-input" class="chat-input" placeholder="Digite seu comando..." required>
+                    <button type="submit" id="send-btn" class="button-primary">
+                        Criar
+                    </button>
+                </form>
+            </footer>
+        </aside>
+
+        <!-- Painel Direito: Saídas da IA -->
+        <div class="output-container">
+
+            <!-- Saída de Descrição -->
+            <article class="output-panel">
+                <header class="panel-header">
+                    <h2 class="header-title teal-title">Visão do Bardo</h2>
+                </header>
+                <div id="description-content" class="panel-content custom-scrollbar">
+                    <p class="placeholder-text">A descrição do local, gerada pela IA, aparecerá aqui...</p>
+                    <br>
+                    <p>Você adentra uma taverna antiga. O ar é denso com o cheiro de madeira envelhecida, cerveja derramada e o fumo adocicado de cachimbos. Vigas de carvalho escuro sustentam o teto baixo, de onde pendem candelabros de ferro forjado que lançam uma luz trêmula e dourada sobre as mesas rústicas. Em um canto, um bardo dedilha suavemente um alaúde, sua melodia melancólica se misturando ao murmúrio das conversas e ao tilintar de canecas.</p>
+                </div>
+            </article>
+
+            <!-- Saída de Imagem -->
+            <article class="output-panel">
+                <header class="panel-header">
+                    <h2 class="header-title amber-title">Olhar do Arcanista</h2>
+                </header>
+                <figure id="image-container" class="image-display-area">
+                    <div class="image-placeholder">
+                        <img src="https://placehold.co/600x400/111827/9ca3af?text=Imagem+da+Taverna" alt="Imagem gerada pela IA de uma taverna" class="generated-image">
+                    </div>
+                </figure>
+            </article>
+        </div>
+    </main>
+
+    <!-- JavaScript Externo -->
+    <script src="script.js"></script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPG Assistant</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- CSS Externo com classes semânticas -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <main class="app-container">
+
+        <!-- Painel Esquerdo: Chat -->
+        <aside class="chat-panel">
+            <header class="panel-header">
+                <h2 class="header-title purple-title">Diário do Aventureiro</h2>
+            </header>
+            
+            <!-- Área de Mensagens -->
+            <section id="chat-messages" class="chat-messages-area custom-scrollbar">
+                <!-- Mensagem de Exemplo -->
+                <div class="message-container">
+                    <div class="avatar master-avatar">M</div>
+                    <div class="message-bubble master-bubble">
+                        <p>Bem-vindo, mestre! Descreva a cena, o personagem ou o item que deseja criar, e eu darei vida a ele.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Área de Input -->
+            <footer class="panel-footer">
+                <form id="chat-form" class="chat-form">
+                    <input type="text" id="chat-input" class="chat-input" placeholder="Digite seu comando..." required>
+                    <button type="submit" id="send-btn" class="button-primary">
+                        Criar
+                    </button>
+                </form>
+            </footer>
+        </aside>
+
+        <!-- Painel Direito: Saídas da IA -->
+        <div class="output-container">
+
+            <!-- Saída de Descrição -->
+            <article class="output-panel">
+                <header class="panel-header">
+                    <h2 class="header-title teal-title">Visão do Bardo</h2>
+                </header>
+                <div id="description-content" class="panel-content custom-scrollbar">
+                    <p class="placeholder-text">A descrição do local, gerada pela IA, aparecerá aqui...</p>
+                    <br>
+                    <p>Você adentra uma taverna antiga. O ar é denso com o cheiro de madeira envelhecida, cerveja derramada e o fumo adocicado de cachimbos. Vigas de carvalho escuro sustentam o teto baixo, de onde pendem candelabros de ferro forjado que lançam uma luz trêmula e dourada sobre as mesas rústicas. Em um canto, um bardo dedilha suavemente um alaúde, sua melodia melancólica se misturando ao murmúrio das conversas e ao tilintar de canecas.</p>
+                </div>
+            </article>
+
+            <!-- Saída de Imagem -->
+            <article class="output-panel">
+                <header class="panel-header">
+                    <h2 class="header-title amber-title">Olhar do Arcanista</h2>
+                </header>
+                <figure id="image-container" class="image-display-area">
+                    <div class="image-placeholder">
+                        <img src="https://placehold.co/600x400/111827/9ca3af?text=Imagem+da+Taverna" alt="Imagem gerada pela IA de uma taverna" class="generated-image">
+                    </div>
+                </figure>
+            </article>
+        </div>
+    </main>
+
+    <!-- JavaScript Externo -->
+    <script src="script.js"></script>
+</body>
+</html>
